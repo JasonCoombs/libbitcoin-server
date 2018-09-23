@@ -28,6 +28,8 @@
 #include <boost/filesystem.hpp>
 #include <bitcoin/server.hpp>
 
+extern libbitcoin::server::configuration configured;
+
 namespace libbitcoin {
 namespace server {
 
@@ -55,33 +57,37 @@ executor::executor(parser& metadata, std::istream& ,
     std::ostream& output, std::ostream& error)
   : metadata_(metadata), output_(output), error_(error)
 {
-    const auto& network = metadata_.configured.network;
-    const auto verbose = network.verbose;
+    const auto& network = configured.network;
+    if(network)
+    {
+
+    const auto verbose = network->verbose;
 
     const log::rotable_file debug_file
     {
-        network.debug_file,
-        network.archive_directory,
-        network.rotation_size,
-        network.maximum_archive_size,
-        network.minimum_free_space,
-        network.maximum_archive_files
+        network->debug_file,
+        network->archive_directory,
+        network->rotation_size,
+        network->maximum_archive_size,
+        network->minimum_free_space,
+        network->maximum_archive_files
     };
 
     const log::rotable_file error_file
     {
-        network.error_file,
-        network.archive_directory,
-        network.rotation_size,
-        network.maximum_archive_size,
-        network.minimum_free_space,
-        network.maximum_archive_files
+        network->error_file,
+        network->archive_directory,
+        network->rotation_size,
+        network->maximum_archive_size,
+        network->minimum_free_space,
+        network->maximum_archive_files
     };
 
     log::stream console_out(&output_, null_deleter());
     log::stream console_err(&error_, null_deleter());
 
     log::initialize(debug_file, error_file, console_out, console_err, verbose);
+    }
     handle_stop(initialize_stop);
 }
 
@@ -91,7 +97,7 @@ executor::executor(parser& metadata, std::istream& ,
 
 void executor::do_help()
 {
-    const auto options = metadata_.load_options();
+    const auto options = metadata_.load_options(&configured);
     printer help(options, application_name, BS_INFORMATION_MESSAGE);
     help.initialize();
     help.commandline(output_);
@@ -99,7 +105,7 @@ void executor::do_help()
 
 void executor::do_settings()
 {
-    const auto settings = metadata_.load_settings();
+    const auto settings = metadata_.load_settings(&configured);
     printer print(settings, application_name, BS_SETTINGS_MESSAGE);
     print.initialize();
     print.settings(output_);
@@ -121,15 +127,15 @@ bool executor::do_initchain()
     initialize_output();
 
     error_code ec;
-    const auto& directory = metadata_.configured.database.directory;
+    const auto& directory = configured.database->directory;
 
     if (create_directories(directory, ec))
     {
         LOG_INFO(LOG_SERVER) << format(BS_INITIALIZING_CHAIN) % directory;
 
-        const auto& bitcoin_settings = metadata_.configured.bitcoin;
-        const auto result = data_base(metadata_.configured.database).create(
-            bitcoin_settings.genesis_block);
+        const auto& bitcoin_settings = configured.bitcoin;
+        const auto result = data_base(*configured.database).create(
+            bitcoin_settings->genesis_block);
 
         LOG_INFO(LOG_SERVER) << BS_INITCHAIN_COMPLETE;
         return result;
@@ -150,7 +156,7 @@ bool executor::do_initchain()
 
 bool executor::menu()
 {
-    const auto& config = metadata_.configured;
+    const auto& config = configured;
 
     if (config.help)
     {
@@ -192,11 +198,11 @@ bool executor::run()
         return false;
 
     // Now that the directory is verified we can create the node for it.
-    node_ = std::make_shared<server_node>(metadata_.configured);
+    node_ = std::make_shared<server_node>(configured);
 
     // Initialize broadcast to statistics server if configured.
     log::initialize_statsd(node_->thread_pool(),
-        metadata_.configured.network.statistics_server);
+        configured.network->statistics_server);
 
     // The callback may be returned on the same thread.
     node_->start(
@@ -302,7 +308,7 @@ void executor::initialize_output()
     LOG_ERROR(LOG_SERVER) << header;
     LOG_FATAL(LOG_SERVER) << header;
 
-    const auto& file = metadata_.configured.file;
+    const auto& file = configured.configfile;
 
     if (file.empty())
         LOG_INFO(LOG_SERVER) << BS_USING_DEFAULT_CONFIG;
@@ -314,7 +320,7 @@ void executor::initialize_output()
 bool executor::verify_directory()
 {
     error_code ec;
-    const auto& directory = metadata_.configured.database.directory;
+    const auto& directory = configured.database->directory;
 
     if (exists(directory, ec))
         return true;

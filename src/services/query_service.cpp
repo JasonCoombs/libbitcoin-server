@@ -41,13 +41,13 @@ const config::endpoint& query_service::worker_endpoint(bool secure)
 
 query_service::query_service(zmq::authenticator& authenticator,
     server_node& node, bool secure)
-  : worker(priority(node.server_settings().priority)),
+  : worker(priority(node.server_settings()->priority)),
     secure_(secure),
     security_(secure ? "secure" : "public"),
     settings_(node.server_settings()),
     external_(node.protocol_settings()),
-    internal_(external_.send_high_water, external_.receive_high_water),
-    service_(settings_.query_endpoint(secure)),
+    internal_(external_->send_high_water, external_->receive_high_water),
+    service_(settings_->query_endpoint(secure)),
     worker_(secure ? secure_worker : public_worker),
     authenticator_(authenticator)
 {
@@ -64,7 +64,7 @@ query_service::query_service(zmq::authenticator& authenticator,
 // also be dropped. api.zeromq.org/4-2:zmq-socket
 void query_service::work()
 {
-    zmq::socket router(authenticator_, role::router, external_);
+    zmq::socket router(authenticator_, role::router, *external_);
     zmq::socket dealer(authenticator_, role::dealer, internal_);
 
     // Bind sockets to the service and worker endpoints.

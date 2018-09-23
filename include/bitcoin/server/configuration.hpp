@@ -43,11 +43,22 @@ class BCS_API configuration
   : public node::configuration
 {
 public:
-    configuration(config::settings context);
+    configuration();
+    ~configuration();
+    void init(config::settings context);
+    // command line parameters
+    bool version;
+    boost::filesystem::path configfile;
+    bool settings;
+    bool help;
+    bool initchain;
+    bool regtest;
+    bool testnet;
 
     /// Settings.
-    bc::server::settings server;
-    bc::protocol::settings protocol;
+    bc::server::settings *server;
+    bc::protocol::settings *protocol;
+    libbitcoin::settings *bitcoin;
 };
 
 } // namespace server

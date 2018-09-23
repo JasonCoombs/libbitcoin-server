@@ -18,17 +18,75 @@
  */
 #include <bitcoin/server/configuration.hpp>
 
-#include <bitcoin/server/settings.hpp>
+#include <cstddef>
+#include <bitcoin/blockchain.hpp>
+#include <bitcoin/network.hpp>
 
 namespace libbitcoin {
-namespace server {
+    namespace server {
+        
+        // Construct with defaults and no context
+        configuration::configuration()
+        {
+            help = false;
+            initchain = false;
+            regtest = false;
+            testnet = false;
+            settings = false;
+            version = false;
+            server = NULL;
+            protocol = NULL;
+            bitcoin = NULL;
+        }
+        
+        configuration::~configuration()
+        {
+            if (server)
+                delete server;
+            if (protocol)
+                delete protocol;
+            if (bitcoin)
+                delete bitcoin;
+        }
+        
+        // Initialize for the given context
+        void configuration::init(config::settings context)
+        {
+            server = new bc::server::settings(context);
+            protocol = new bc::protocol::settings();
+            bitcoin = new bc::settings(context);
 
-// Construct with defaults derived from given context.
-configuration::configuration(bc::config::settings context)
-  : node::configuration(context),
-    server(context)
-{
-}
-
-} // namespace server
+            using serve = bc::message::version::service;
+            
+/*            if (database)
+            {
+                // A node doesn't use history, and history is expensive.
+                database->index_addresses = false;
+            }
+            
+            if (network)
+            {
+                // Logs will slow things if not rotated.
+                network->rotation_size = 10000000;
+                
+                // It is a public network.
+                network->inbound_connections = 100;
+                
+                // Optimal for sync and network penetration.
+                network->outbound_connections = 8;
+                
+                // A node allows 10000 host names by default.
+                network->host_pool_capacity = 10000;
+                
+                // Expose full node (1) and witness (8) network services by default.
+                network->services = serve::node_network | serve::node_witness;
+                
+                // TODO: set this independently on each public endpoint.
+//                protocol.message_size_limit = max_block_size + 100;
+            }
+ */
+        }
+        
+    } // namespace node
 } // namespace libbitcoin
+

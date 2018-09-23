@@ -38,12 +38,12 @@ using role = zmq::socket::role;
 
 query_worker::query_worker(zmq::authenticator& authenticator,
     server_node& node, bool secure)
-  : worker(priority(node.server_settings().priority)),
+  : worker(priority(node.server_settings()->priority)),
     secure_(secure),
     security_(secure ? "secure" : "public"),
     settings_(node.server_settings()),
     external_(node.protocol_settings()),
-    internal_(external_.send_high_water, external_.receive_high_water),
+    internal_(external_->send_high_water, external_->receive_high_water),
     worker_(query_service::worker_endpoint(secure)),
     authenticator_(authenticator),
     node_(node)

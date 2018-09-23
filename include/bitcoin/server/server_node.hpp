@@ -46,7 +46,7 @@ public:
     typedef std::shared_ptr<server_node> ptr;
 
     /// Construct a server node.
-    server_node(const configuration& configuration);
+    server_node( configuration& configuration);
 
     /// Ensure all threads are coalesced.
     virtual ~server_node();
@@ -55,10 +55,10 @@ public:
     // ----------------------------------------------------------------------------
 
     /// Server configuration settings.
-    virtual const bc::protocol::settings& protocol_settings() const;
+    virtual bc::protocol::settings *protocol_settings() const;
 
     /// Server configuration settings.
-    virtual const bc::server::settings& server_settings() const;
+    virtual bc::server::settings *server_settings() const;
 
     // Run sequence.
     // ------------------------------------------------------------------------
@@ -100,7 +100,7 @@ private:
     bool start_query_workers(bool secure);
     bool start_notification_workers(bool secure);
 
-    const configuration& configuration_;
+     configuration& configuration_;
 
     // These are thread safe.
     authenticator authenticator_;

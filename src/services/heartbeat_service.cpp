@@ -36,12 +36,12 @@ using role = zmq::socket::role;
 // Heartbeat is capped at ~ 25 days by signed/millsecond conversions.
 heartbeat_service::heartbeat_service(zmq::authenticator& authenticator,
     server_node& node, bool secure)
-  : worker(priority(node.server_settings().priority)),
+  : worker(priority(node.server_settings()->priority)),
     secure_(secure),
     security_(secure ? "secure" : "public"),
     settings_(node.server_settings()),
     external_(node.protocol_settings()),
-    service_(settings_.heartbeat_endpoint(secure)),
+    service_(settings_->heartbeat_endpoint(secure)),
     authenticator_(authenticator),
     node_(node),
 
@@ -54,7 +54,7 @@ heartbeat_service::heartbeat_service(zmq::authenticator& authenticator,
 // The publisher drops messages for lost peers (clients) and high water.
 void heartbeat_service::work()
 {
-    zmq::socket publisher(authenticator_, role::publisher, external_);
+    zmq::socket publisher(authenticator_, role::publisher, *external_);
 
     // Bind socket to the service endpoint.
     if (!started(bind(publisher)))
@@ -79,7 +79,7 @@ void heartbeat_service::work()
 
 int32_t heartbeat_service::pulse_milliseconds() const
 {
-    const int64_t seconds = settings_.heartbeat_service_seconds;
+    const int64_t seconds = settings_->heartbeat_service_seconds;
     const int64_t milliseconds = seconds * 1000;
     auto capped = std::min(milliseconds, static_cast<int64_t>(max_int32));
     return static_cast<int32_t>(capped);

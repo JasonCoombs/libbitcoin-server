@@ -35,7 +35,7 @@ using namespace bc::chain;
 using namespace bc::node;
 using namespace bc::protocol;
 
-server_node::server_node(const configuration& configuration)
+server_node::server_node( configuration& configuration)
   : full_node(configuration),
     configuration_(configuration),
     authenticator_(*this),
@@ -61,12 +61,12 @@ server_node::~server_node()
 // Properties.
 // ----------------------------------------------------------------------------
 
-const bc::protocol::settings& server_node::protocol_settings() const
+ bc::protocol::settings *server_node::protocol_settings() const
 {
     return configuration_.protocol;
 }
 
-const bc::server::settings& server_node::server_settings() const
+ bc::server::settings *server_node::server_settings() const
 {
     return configuration_.server;
 }
@@ -167,14 +167,14 @@ bool server_node::start_services()
 
 bool server_node::start_authenticator()
 {
-    const auto& settings = configuration_.server;
+     auto& settings = configuration_.server;
 
     // Subscriptions require the query service.
-    if ((!settings.server_private_key && settings.secure_only) ||
-        ((settings.query_workers == 0) &&
-        (settings.heartbeat_service_seconds == 0) &&
-        (!settings.block_service_enabled) &&
-        (!settings.transaction_service_enabled)))
+    if ((!settings->server_private_key && settings->secure_only) ||
+        ((settings->query_workers == 0) &&
+        (settings->heartbeat_service_seconds == 0) &&
+        (!settings->block_service_enabled) &&
+        (!settings->transaction_service_enabled)))
         return true;
 
     return authenticator_.start();
@@ -185,19 +185,19 @@ bool server_node::start_query_services()
     const auto& settings = configuration_.server;
 
     // Subscriptions require the query service.
-    if (settings.query_workers == 0)
+    if (settings->query_workers == 0)
         return true;
 
     // Start secure service, query workers and notification workers if enabled.
-    if (settings.server_private_key &&
+    if (settings->server_private_key &&
         (!secure_query_service_.start() || !start_query_workers(true) ||
-        (settings.subscription_limit > 0 && !start_notification_workers(true))))
+        (settings->subscription_limit > 0 && !start_notification_workers(true))))
             return false;
 
     // Start public service, query workers and notification workers if enabled.
-    if (!settings.secure_only &&
+    if (!settings->secure_only &&
         (!public_query_service_.start() || !start_query_workers(false) ||
-        (settings.subscription_limit > 0 && !start_notification_workers(false))))
+        (settings->subscription_limit > 0 && !start_notification_workers(false))))
             return false;
 
     return true;
@@ -207,15 +207,15 @@ bool server_node::start_heartbeat_services()
 {
     const auto& settings = configuration_.server;
 
-    if (settings.heartbeat_service_seconds == 0)
+    if (settings->heartbeat_service_seconds == 0)
         return true;
 
     // Start secure service if enabled.
-    if (settings.server_private_key && !secure_heartbeat_service_.start())
+    if (settings->server_private_key && !secure_heartbeat_service_.start())
         return false;
 
     // Start public service if enabled.
-    if (!settings.secure_only && !public_heartbeat_service_.start())
+    if (!settings->secure_only && !public_heartbeat_service_.start())
         return false;
 
     return true;
@@ -225,15 +225,15 @@ bool server_node::start_block_services()
 {
     const auto& settings = configuration_.server;
 
-    if (!settings.block_service_enabled)
+    if (!settings->block_service_enabled)
         return true;
 
     // Start secure service if enabled.
-    if (settings.server_private_key && !secure_block_service_.start())
+    if (settings->server_private_key && !secure_block_service_.start())
         return false;
 
     // Start public service if enabled.
-    if (!settings.secure_only && !public_block_service_.start())
+    if (!settings->secure_only && !public_block_service_.start())
         return false;
 
     return true;
@@ -243,15 +243,15 @@ bool server_node::start_transaction_services()
 {
     const auto& settings = configuration_.server;
 
-    if (!settings.transaction_service_enabled)
+    if (!settings->transaction_service_enabled)
         return true;
 
     // Start secure service if enabled.
-    if (settings.server_private_key && !secure_transaction_service_.start())
+    if (settings->server_private_key && !secure_transaction_service_.start())
         return false;
 
     // Start public service if enabled.
-    if (!settings.secure_only && !public_transaction_service_.start())
+    if (!settings->secure_only && !public_transaction_service_.start())
         return false;
 
     return true;
@@ -263,7 +263,7 @@ bool server_node::start_query_workers(bool secure)
     auto& server = *this;
     const auto& settings = configuration_.server;
 
-    for (auto count = 0; count < settings.query_workers; ++count)
+    for (auto count = 0; count < settings->query_workers; ++count)
     {
         const auto worker = std::make_shared<query_worker>(authenticator_,
             server, secure);

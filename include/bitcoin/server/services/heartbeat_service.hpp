@@ -61,8 +61,8 @@ private:
     // These are thread safe.
     const bool secure_;
     const std::string security_;
-    const bc::server::settings& settings_;
-    const bc::protocol::settings& external_;
+     bc::server::settings *settings_;
+     bc::protocol::settings *external_;
     const config::endpoint service_;
     bc::protocol::zmq::authenticator& authenticator_;
     server_node& node_;

@@ -40,13 +40,13 @@ static const auto secure_worker = "inproc://secure_tx";
 
 transaction_service::transaction_service(zmq::authenticator& authenticator,
     server_node& node, bool secure)
-  : worker(priority(node.server_settings().priority)),
+  : worker(priority(node.server_settings()->priority)),
     secure_(secure),
     security_(secure ? "secure" : "public"),
     settings_(node.server_settings()),
     external_(node.protocol_settings()),
-    internal_(external_.send_high_water, external_.receive_high_water),
-    service_(settings_.transaction_endpoint(secure)),
+    internal_(external_->send_high_water, external_->receive_high_water),
+    service_(settings_->transaction_endpoint(secure)),
     worker_(secure ? secure_worker : public_worker),
     authenticator_(authenticator),
     node_(node),
@@ -71,7 +71,7 @@ bool transaction_service::start()
 // The publisher drops messages for lost peers (clients) and high water.
 void transaction_service::work()
 {
-    zmq::socket xpub(authenticator_, role::extended_publisher, external_);
+    zmq::socket xpub(authenticator_, role::extended_publisher, *external_);
     zmq::socket xsub(authenticator_, role::extended_subscriber, internal_);
 
     // Bind sockets to the service and worker endpoints.

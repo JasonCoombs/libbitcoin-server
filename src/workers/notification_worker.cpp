@@ -52,12 +52,12 @@ static const auto notification_stealth = "notification.stealth";
 
 notification_worker::notification_worker(zmq::authenticator& authenticator,
     server_node& node, bool secure)
-  : worker(priority(node.server_settings().priority)),
+  : worker(priority(node.server_settings()->priority)),
     secure_(secure),
     security_(secure ? "secure" : "public"),
     settings_(node.server_settings()),
     external_(node.protocol_settings()),
-    internal_(external_.send_high_water, external_.receive_high_water),
+    internal_(external_->send_high_water, external_->receive_high_water),
     worker_(query_service::worker_endpoint(secure)),
     authenticator_(authenticator),
     node_(node)
@@ -396,22 +396,22 @@ time_t notification_worker::current_time()
 time_t notification_worker::cutoff_time() const
 {
     // In case a purge call is made, nothing will be puged (until rollover).
-    if (settings_.subscription_expiration_minutes == 0)
+    if (settings_->subscription_expiration_minutes == 0)
         return max_int32;
 
     // use system_clock to ensure to_time_t is defined.
     const auto now = system_clock::now();
-    const auto period = minutes(settings_.subscription_expiration_minutes);
+    const auto period = minutes(settings_->subscription_expiration_minutes);
     return system_clock::to_time_t(now - period);
 }
 
 int32_t notification_worker::purge_milliseconds() const
 {
     // This results in infinite polling and therefore no purge calls.
-    if (settings_.subscription_expiration_minutes == 0)
+    if (settings_->subscription_expiration_minutes == 0)
         return -1;
 
-    const int64_t minutes = settings_.subscription_expiration_minutes;
+    const int64_t minutes = settings_->subscription_expiration_minutes;
     const int64_t milliseconds = minutes * 60 * 1000;
     auto capped = std::min(milliseconds, static_cast<int64_t>(max_int32));
     return static_cast<int32_t>(capped);
@@ -533,7 +533,7 @@ code notification_worker::subscribe_address(const message& request,
     }
 
     // TODO: add independent limits for stealth and address.
-    if (address_subscriptions_.size() >= settings_.subscription_limit)
+    if (address_subscriptions_.size() >= settings_->subscription_limit)
     {
         address_mutex_.unlock_upgrade();
         //---------------------------------------------------------------------
@@ -585,7 +585,7 @@ code notification_worker::subscribe_stealth(const message& request,
     }
 
     // TODO: add independent limits for stealth and address.
-    if (stealth_subscriptions_.size() >= settings_.subscription_limit)
+    if (stealth_subscriptions_.size() >= settings_->subscription_limit)
     {
         stealth_mutex_.unlock_upgrade();
         //---------------------------------------------------------------------

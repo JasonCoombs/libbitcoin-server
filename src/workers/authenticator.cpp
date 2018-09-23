@@ -29,14 +29,14 @@ namespace server {
 using namespace bc::protocol;
 
 authenticator::authenticator(server_node& node)
-  : zmq::authenticator(priority(node.server_settings().priority))
+  : zmq::authenticator(priority(node.server_settings()->priority))
 {
     const auto& settings = node.server_settings();
 
-    set_private_key(settings.server_private_key);
+    set_private_key(settings->server_private_key);
 
     // Secure clients are also affected by address restrictions.
-    for (const auto& public_key: settings.client_public_keys)
+    for (const auto& public_key: settings->client_public_keys)
     {
         LOG_DEBUG(LOG_SERVER)
             << "Allow client public key [" << public_key << "]";
@@ -45,7 +45,7 @@ authenticator::authenticator(server_node& node)
     }
 
     // Allow wins in case of conflict with deny (first writer).
-    for (const auto& address: settings.client_addresses)
+    for (const auto& address: settings->client_addresses)
     {
         LOG_DEBUG(LOG_SERVER)
             << "Allow client address [" << address.to_hostname() << "]";
@@ -55,7 +55,7 @@ authenticator::authenticator(server_node& node)
     }
 
     // Allow wins in case of conflict with deny (first writer).
-    for (const auto& address: settings.blacklists)
+    for (const auto& address: settings->blacklists)
     {
         LOG_DEBUG(LOG_SERVER)
             << "Block client address [" << address.to_hostname() << "]";
