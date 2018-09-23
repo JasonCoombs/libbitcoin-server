@@ -16,6 +16,7 @@ libobelisk.pc
 /build-aux
 /config.*
 /configure
+/console/bs
 /libtool
 .dirstamp
 
