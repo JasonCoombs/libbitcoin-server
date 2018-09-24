@@ -145,7 +145,7 @@ options_metadata parser::load_settings(config::configuration *pconf)
     
     server::configuration *servconf = (server::configuration *)pconf;
 
-    if (!servconf->server || !servconf->protocol || !servconf->bitcoin)
+    if (!servconf->server || !servconf->protocol || !servconf->bitcoin || !servconf->network || !servconf->database || !servconf->chain || !servconf->node)
     {
         return om;
     }
@@ -321,11 +321,12 @@ options_metadata parser::load_settings(config::configuration *pconf)
     )
 
     /* [database] */
-    (
+/*    (
         "database.directory",
         value<path>(&servconf->database->directory),
-        "The blockchain database directory, defaults to 'blockchain'."
+        "The blockchain database directory, defaults to 'servblockchain'."
     )
+ TODO: re-enable configurable database directory, must adjust for testnet */
     (
         "database.flush_writes",
         value<bool>(&servconf->database->flush_writes),

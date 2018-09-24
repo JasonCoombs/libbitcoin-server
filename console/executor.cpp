@@ -127,6 +127,9 @@ bool executor::do_initchain()
     initialize_output();
 
     error_code ec;
+    
+    if (configured.database)
+    {
     const auto& directory = configured.database->directory;
 
     if (create_directories(directory, ec))
@@ -148,6 +151,11 @@ bool executor::do_initchain()
     }
 
     LOG_ERROR(LOG_SERVER) << format(BS_INITCHAIN_NEW) % directory % ec.message();
+    }
+    else
+    {
+        LOG_ERROR(LOG_SERVER) << "do_initchain() failed: configured.database is null pointer.";
+    }
     return false;
 }
 

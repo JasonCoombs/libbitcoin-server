@@ -70,17 +70,17 @@ int bc::main(int argc, char* argv[])
 
     if (!configured.regtest && !configured.testnet)
     {
-        configured.init(config::settings::mainnet);
+        configured.init(config::settings::mainnet_server);
     }
     else if (configured.testnet)
     {
-        configured.init(config::settings::testnet);
+        configured.init(config::settings::testnet_server);
     }
     else
     {
         // The regression testing network
         // https://github.com/libbitcoin/libbitcoin-server/wiki/Regtest-Configuration
-        configured.init(config::settings::regtest);
+        configured.init(config::settings::regtest_server);
     }
     
     try

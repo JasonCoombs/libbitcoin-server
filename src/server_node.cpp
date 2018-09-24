@@ -36,7 +36,7 @@ using namespace bc::node;
 using namespace bc::protocol;
 
 server_node::server_node( configuration& configuration)
-  : full_node(configuration),
+    : full_node(&configuration),
     configuration_(configuration),
     authenticator_(*this),
     secure_query_service_(authenticator_, *this, true),

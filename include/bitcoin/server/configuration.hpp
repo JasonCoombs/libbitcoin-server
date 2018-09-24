@@ -40,13 +40,14 @@ namespace server {
 
 /// Full server node configuration, thread safe.
 class BCS_API configuration
-  : public node::configuration
+  : public config::configuration
 {
 public:
     configuration();
     ~configuration();
     void init(config::settings context);
-    // command line parameters
+
+    /// Options.
     bool version;
     boost::filesystem::path configfile;
     bool settings;
@@ -54,11 +55,15 @@ public:
     bool initchain;
     bool regtest;
     bool testnet;
-
+    
     /// Settings.
+    libbitcoin::settings *bitcoin;
+    blockchain::settings *chain;
+    node::settings *node;
+    database::settings *database;
+    network::settings *network;
     bc::server::settings *server;
     bc::protocol::settings *protocol;
-    libbitcoin::settings *bitcoin;
 };
 
 } // namespace server

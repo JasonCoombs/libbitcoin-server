@@ -26,17 +26,22 @@ namespace libbitcoin {
     namespace server {
         
         // Construct with defaults and no context
+        // constructor
         configuration::configuration()
         {
+            version = false;
+            settings = false;
             help = false;
             initchain = false;
             regtest = false;
             testnet = false;
-            settings = false;
-            version = false;
+            bitcoin = NULL;
+            chain = NULL;
+            node = NULL;
+            database = NULL;
+            network = NULL;
             server = NULL;
             protocol = NULL;
-            bitcoin = NULL;
         }
         
         configuration::~configuration()
@@ -45,6 +50,14 @@ namespace libbitcoin {
                 delete server;
             if (protocol)
                 delete protocol;
+            if (node)
+                delete node;
+            if (chain)
+                delete chain;
+            if (database)
+                delete database;
+            if (network)
+                delete network;
             if (bitcoin)
                 delete bitcoin;
         }
@@ -52,11 +65,16 @@ namespace libbitcoin {
         // Initialize for the given context
         void configuration::init(config::settings context)
         {
+//            node::configuration::init(context);
+            node = new node::settings(context);
+            chain = new blockchain::settings(context);
+            database = new database::settings(context);
+            network = new network::settings(context);
+            bitcoin = new libbitcoin::settings(context);
             server = new bc::server::settings(context);
             protocol = new bc::protocol::settings();
-            bitcoin = new bc::settings(context);
 
-            using serve = bc::message::version::service;
+//            using serve = bc::message::version::service;
             
 /*            if (database)
             {
