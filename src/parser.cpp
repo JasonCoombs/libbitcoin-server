@@ -294,11 +294,12 @@ options_metadata parser::load_settings(config::configuration *pconf)
         value<uint32_t>(&servconf->network->host_pool_capacity),
         "The maximum number of peer hosts in the pool, defaults to 10000."
     )
-    (
+/*    (
         "network.hosts_file",
         value<path>(&servconf->network->hosts_file),
         "The peer hosts cache file path, defaults to 'hosts.cache'."
     )
+*/
     (
         "network.self",
         value<config::authority>(&servconf->network->self),
